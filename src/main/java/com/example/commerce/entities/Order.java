@@ -34,9 +34,18 @@ public class Order {
     @Column(name = "total_amount", nullable = false)
     private BigDecimal totalAmount;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "shipping_address_id")
-    private Address shippingAddress;
+    // Embedded shipping address fields (snapshot at order creation)
+    @Column(name = "shipping_street")
+    private String shippingStreet;
+
+    @Column(name = "shipping_city")
+    private String shippingCity;
+
+    @Column(name = "shipping_state")
+    private String shippingState;
+
+    @Column(name = "shipping_zip")
+    private String shippingZip;
 
     @Column(name = "order_date", nullable = false)
     @Builder.Default

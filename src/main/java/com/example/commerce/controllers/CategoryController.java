@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,6 +42,7 @@ public class CategoryController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
     public ResponseEntity<CategoryResponseDTO> createCategory(@RequestBody CategoryRequestDTO categoryRequestDTO) {
         logger.info("POST /categories - Creating new category with name: {}", categoryRequestDTO.getName());
         CategoryResponseDTO createdCategory = categoryService.createCategory(categoryRequestDTO);
@@ -49,6 +51,7 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
     public ResponseEntity<CategoryResponseDTO> updateCategory(@PathVariable Byte id, @RequestBody CategoryRequestDTO categoryRequestDTO) {
         logger.info("PUT /categories/{} - Updating category", id);
         CategoryResponseDTO updatedCategory = categoryService.updateCategory(id, categoryRequestDTO);
@@ -57,6 +60,7 @@ public class CategoryController {
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
     public ResponseEntity<CategoryResponseDTO> partialUpdateCategory(@PathVariable Byte id, @RequestBody CategoryRequestDTO categoryRequestDTO) {
         logger.info("PATCH /categories/{} - Partially updating category", id);
         CategoryResponseDTO updatedCategory = categoryService.updateCategory(id, categoryRequestDTO);
@@ -65,6 +69,7 @@ public class CategoryController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
     public ResponseEntity<Void> deleteCategory(@PathVariable Byte id) {
         logger.info("DELETE /categories/{} - Deleting category", id);
         categoryService.deleteCategory(id);

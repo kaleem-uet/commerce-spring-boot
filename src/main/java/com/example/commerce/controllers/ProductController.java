@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,6 +42,7 @@ public class ProductController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
     public ResponseEntity<ProductResponseDTO> createProduct(@RequestBody ProductRequestDTO productRequestDTO) {
         logger.info("POST /products - Creating new product with name: {}", productRequestDTO.getName());
         ProductResponseDTO createdProduct = productService.createProduct(productRequestDTO);
@@ -49,6 +51,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
     public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable Long id, @RequestBody ProductRequestDTO productRequestDTO) {
         logger.info("PUT /products/{} - Updating product", id);
         ProductResponseDTO updatedProduct = productService.updateProduct(id, productRequestDTO);
@@ -57,6 +60,7 @@ public class ProductController {
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
     public ResponseEntity<ProductResponseDTO> partialUpdateProduct(@PathVariable Long id, @RequestBody ProductRequestDTO productRequestDTO) {
         logger.info("PATCH /products/{} - Partially updating product", id);
         ProductResponseDTO updatedProduct = productService.updateProduct(id, productRequestDTO);
@@ -65,6 +69,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         logger.info("DELETE /products/{} - Deleting product", id);
         productService.deleteProduct(id);

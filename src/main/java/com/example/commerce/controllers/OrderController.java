@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,6 +37,7 @@ public class OrderController {
             @ApiResponse(responseCode = "400", description = "Invalid status parameter")
     })
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
     public ResponseEntity<List<OrderResponseDTO>> getAllOrders(
             @Parameter(description = "Filter orders by user ID") @RequestParam(required = false) Long userId,
             @Parameter(description = "Filter orders by status (PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED)") @RequestParam(required = false) String status
@@ -92,6 +94,7 @@ public class OrderController {
             @ApiResponse(responseCode = "404", description = "Order not found")
     })
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
     public ResponseEntity<OrderResponseDTO> updateOrderStatus(
             @Parameter(description = "Order ID") @PathVariable Long id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Status update (PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED)")
@@ -114,6 +117,7 @@ public class OrderController {
             @ApiResponse(responseCode = "404", description = "Order not found")
     })
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteOrder(
             @Parameter(description = "Order ID") @PathVariable Long id) {
         logger.info("DELETE /orders/{} - Deleting order", id);

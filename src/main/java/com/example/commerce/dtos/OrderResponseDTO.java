@@ -12,7 +12,7 @@ public class OrderResponseDTO {
     private Long userId;
     private String status;
     private BigDecimal totalAmount;
-    private Long shippingAddressId;
+    private ShippingAddressDTO shippingAddress;
     private LocalDateTime orderDate;
     private LocalDateTime updatedAt;
     private List<OrderItemResponseDTO> orderItems;

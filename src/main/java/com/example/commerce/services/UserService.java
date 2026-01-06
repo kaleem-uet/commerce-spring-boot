@@ -2,9 +2,11 @@ package com.example.commerce.services;
 
 import com.example.commerce.dtos.UserRequestDTO;
 import com.example.commerce.dtos.UserResponseDTO;
+import com.example.commerce.entities.Role;
 import com.example.commerce.entities.User;
 import com.example.commerce.exceptions.ResourceNotFoundException;
 import com.example.commerce.mappers.UserMapper;
+import com.example.commerce.repositories.RoleRepository;
 import com.example.commerce.repositories.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,15 +22,17 @@ public class UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final RoleRepository roleRepository;
 
-    public UserService(UserRepository userRepository, UserMapper userMapper) {
+    public UserService(UserRepository userRepository, UserMapper userMapper, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.roleRepository = roleRepository;
     }
 
     public List<UserResponseDTO> getAllUsers(String sort) {
-        if(!List.of("name", "email").contains(sort)) {
-            sort = "name";
+        if(!List.of("username", "email").contains(sort)) {
+            sort = "username";
         }
         logger.debug("Fetching all users from database");
         List<UserResponseDTO> users = userRepository.findAll(Sort.by(sort))
@@ -60,13 +64,18 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
 
         if (userRequestDTO.getName() != null && !userRequestDTO.getName().isEmpty()) {
-            user.setName(userRequestDTO.getName());
+            user.setUsername(userRequestDTO.getName());
         }
         if (userRequestDTO.getEmail() != null && !userRequestDTO.getEmail().isEmpty()) {
             user.setEmail(userRequestDTO.getEmail());
         }
         if (userRequestDTO.getPassword() != null && !userRequestDTO.getPassword().isEmpty()) {
             user.setPassword(userRequestDTO.getPassword());
+        }
+        if (userRequestDTO.getRole() != null && !userRequestDTO.getRole().isEmpty()) {
+            Role role = roleRepository.findByName(userRequestDTO.getRole().toUpperCase())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid role: " + userRequestDTO.getRole()));
+            user.setRole(role);
         }
 
         User updatedUser = userRepository.save(user);

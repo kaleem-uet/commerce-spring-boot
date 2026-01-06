@@ -6,7 +6,6 @@ import com.example.commerce.dtos.OrderResponseDTO;
 import com.example.commerce.entities.*;
 import com.example.commerce.exceptions.ResourceNotFoundException;
 import com.example.commerce.mappers.OrderMapper;
-import com.example.commerce.repositories.AddressRepository;
 import com.example.commerce.repositories.OrderRepository;
 import com.example.commerce.repositories.ProductRepository;
 import com.example.commerce.repositories.UserRepository;
@@ -26,18 +25,15 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
-    private final AddressRepository addressRepository;
     private final ProductRepository productRepository;
     private final OrderMapper orderMapper;
 
     public OrderService(OrderRepository orderRepository,
                         UserRepository userRepository,
-                        AddressRepository addressRepository,
                         ProductRepository productRepository,
                         OrderMapper orderMapper) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
-        this.addressRepository = addressRepository;
         this.productRepository = productRepository;
         this.orderMapper = orderMapper;
     }
@@ -103,17 +99,18 @@ public class OrderService {
         User user = userRepository.findById(orderRequestDTO.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", orderRequestDTO.getUserId()));
 
-        // Fetch shipping address if provided
-        Address shippingAddress = null;
-        if (orderRequestDTO.getShippingAddressId() != null) {
-            shippingAddress = addressRepository.findById(orderRequestDTO.getShippingAddressId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Address", "id", orderRequestDTO.getShippingAddressId()));
+        // Validate shipping address
+        if (orderRequestDTO.getShippingAddress() == null) {
+            throw new IllegalArgumentException("Shipping address cannot be null");
         }
 
-        // Create order
+        // Create order with embedded shipping address
         Order order = Order.builder()
                 .user(user)
-                .shippingAddress(shippingAddress)
+                .shippingStreet(orderRequestDTO.getShippingAddress().getStreet())
+                .shippingCity(orderRequestDTO.getShippingAddress().getCity())
+                .shippingState(orderRequestDTO.getShippingAddress().getState())
+                .shippingZip(orderRequestDTO.getShippingAddress().getZip())
                 .status(Order.OrderStatus.PENDING)
                 .orderDate(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
