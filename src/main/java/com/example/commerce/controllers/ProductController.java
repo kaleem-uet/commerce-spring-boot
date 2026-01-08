@@ -5,10 +5,13 @@ import com.example.commerce.dtos.ProductResponseDTO;
 import com.example.commerce.services.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -74,6 +77,40 @@ public class ProductController {
         logger.info("DELETE /products/{} - Deleting product", id);
         productService.deleteProduct(id);
         logger.info("DELETE /products/{} - Product deleted successfully", id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/image")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
+    public ResponseEntity<ProductResponseDTO> uploadProductImage(
+            @PathVariable Long id,
+            @RequestParam("image") MultipartFile file) {
+        logger.info("POST /products/{}/image - Uploading image", id);
+        ProductResponseDTO updatedProduct = productService.uploadProductImage(id, file);
+        logger.info("POST /products/{}/image - Image uploaded successfully", id);
+        return ResponseEntity.ok(updatedProduct);
+    }
+
+    @GetMapping("/{id}/image")
+    public ResponseEntity<byte[]> getProductImage(@PathVariable Long id) {
+        logger.info("GET /products/{}/image - Fetching product image", id);
+        byte[] imageData = productService.getProductImage(id);
+        String imageType = productService.getProductImageType(id);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(imageType));
+        headers.setContentLength(imageData.length);
+
+        logger.info("GET /products/{}/image - Image found, size: {} bytes, type: {}", id, imageData.length, imageType);
+        return new ResponseEntity<>(imageData, headers, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}/image")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
+    public ResponseEntity<Void> deleteProductImage(@PathVariable Long id) {
+        logger.info("DELETE /products/{}/image - Deleting product image", id);
+        productService.deleteProductImage(id);
+        logger.info("DELETE /products/{}/image - Image deleted successfully", id);
         return ResponseEntity.noContent().build();
     }
 }
