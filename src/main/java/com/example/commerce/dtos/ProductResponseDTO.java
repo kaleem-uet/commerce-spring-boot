@@ -11,4 +11,7 @@ public class ProductResponseDTO {
     private String description;
     private String category;
     private BigDecimal price;
+    private String imageName;
+    private String imageType;
+    private boolean hasImage;
 }
