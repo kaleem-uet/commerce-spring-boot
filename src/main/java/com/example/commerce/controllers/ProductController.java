@@ -44,11 +44,23 @@ public class ProductController {
         return ResponseEntity.ok(product);
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAnyRole('ADMIN', 'MODERATOR')")
-    public ResponseEntity<ProductResponseDTO> createProduct(@RequestBody ProductRequestDTO productRequestDTO) {
-        logger.info("POST /products - Creating new product with name: {}", productRequestDTO.getName());
-        ProductResponseDTO createdProduct = productService.createProduct(productRequestDTO);
+    public ResponseEntity<ProductResponseDTO> createProduct(
+            @RequestParam("name") String name,
+            @RequestParam("description") String description,
+            @RequestParam("category") Byte category,
+            @RequestParam("price") String price,
+            @RequestParam(value = "image", required = false) MultipartFile image) {
+        logger.info("POST /products - Creating new product with name: {}", name);
+
+        ProductRequestDTO productRequestDTO = new ProductRequestDTO();
+        productRequestDTO.setName(name);
+        productRequestDTO.setDescription(description);
+        productRequestDTO.setCategory(category);
+        productRequestDTO.setPrice(new java.math.BigDecimal(price));
+
+        ProductResponseDTO createdProduct = productService.createProduct(productRequestDTO, image);
         logger.info("POST /products - Product created with id: {}", createdProduct.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
     }

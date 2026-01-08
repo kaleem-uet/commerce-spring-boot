@@ -56,6 +56,10 @@ public class ProductService {
     }
 
     public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO) {
+        return createProduct(productRequestDTO, null);
+    }
+
+    public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO, MultipartFile image) {
         logger.debug("Creating new product with name: {}", productRequestDTO.getName());
 
         // Validation
@@ -74,6 +78,22 @@ public class ProductService {
             Category category = categoryRepository.findById(productRequestDTO.getCategory())
                     .orElseThrow(() -> new ResourceNotFoundException("Category", "id", productRequestDTO.getCategory()));
             product.setCategory(category);
+        }
+
+        // Handle image upload if provided
+        if (image != null && !image.isEmpty()) {
+            imageService.validateImage(image);
+            try {
+                byte[] imageData = imageService.readImageBytes(image);
+                byte[] compressedImage = imageService.compressImage(imageData);
+
+                product.setImageName(image.getOriginalFilename());
+                product.setImageType(image.getContentType());
+                product.setImageData(compressedImage);
+            } catch (IOException e) {
+                logger.error("Failed to upload image during product creation", e);
+                throw new RuntimeException("Failed to upload image: " + e.getMessage());
+            }
         }
 
         Product savedProduct = productRepository.save(product);
